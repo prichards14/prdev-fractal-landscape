@@ -30,7 +30,7 @@ export function buildLighting(scene: THREE.Scene, params: AtmosphereParams): {
 
   // Sky shader
   const sky = new Sky();
-  sky.scale.setScalar(10000);
+  sky.scale.setScalar(6000); // must be < camera far (8000)
   sky.name = 'sky';
   scene.add(sky);
 

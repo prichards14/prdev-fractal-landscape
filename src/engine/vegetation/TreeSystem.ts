@@ -105,8 +105,8 @@ function buildDeciduousGeometry(): THREE.BufferGeometry {
   const H = 4.2;
   const R = H * 0.36;
 
-  // IcosahedronGeometry detail=3 → 320 triangles, enough for organic look
-  const sphere = new THREE.IcosahedronGeometry(R, 3);
+  // IcosahedronGeometry detail=2 → 80 triangles, organic with vertex perturbation
+  const sphere = new THREE.IcosahedronGeometry(R, 2);
 
   const pos = sphere.attributes.position.array as Float32Array;
   for (let v = 0; v < pos.length; v += 3) {
