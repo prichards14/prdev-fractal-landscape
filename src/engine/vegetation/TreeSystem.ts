@@ -128,10 +128,13 @@ function buildDeciduousGeometry(): THREE.BufferGeometry {
 
   applyVertexColors(sphere, 0.13, 0.38, 0.07, 0.06);
 
-  // Trunk — thicker than conifer
+  // Trunk — IcosahedronGeometry (detail>0) is non-indexed; CylinderGeometry is
+  // indexed. mergeGeometries requires all geometries to match, so convert trunk.
   const trunkH = H * 0.38;
-  const trunk = new THREE.CylinderGeometry(R * 0.075, R * 0.13, trunkH, 7);
-  trunk.translate(0, trunkH / 2, 0);
+  const trunkIndexed = new THREE.CylinderGeometry(R * 0.075, R * 0.13, trunkH, 7);
+  trunkIndexed.translate(0, trunkH / 2, 0);
+  const trunk = trunkIndexed.toNonIndexed();
+  trunkIndexed.dispose();
   applyVertexColors(trunk, 0.27, 0.16, 0.08, 0.03);
 
   _deciduousGeo = mergeGeometries([sphere, trunk]);
@@ -207,7 +210,7 @@ export function buildTreeSystem(
     gLo: number, gHi: number,
     bLo: number, bHi: number
   ) {
-    if (matrices.length === 0) return;
+    if (matrices.length === 0 || !geo) return;
     const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
     const mesh = new THREE.InstancedMesh(geo, mat, matrices.length);
     mesh.name = name;
