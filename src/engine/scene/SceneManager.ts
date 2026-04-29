@@ -4,7 +4,7 @@ import { buildTerrainMesh, type HeightmapData } from '../terrain/TerrainMesh';
 import { buildColorArray } from '../terrain/colorMap';
 import { buildWaterPlane } from '../water/WaterPlane';
 import { buildLighting } from '../atmosphere/Lighting';
-import { buildTreeSystem } from '../vegetation/TreeSystem';
+import { buildTreeSystem, TREE_OBJECT_NAMES } from '../vegetation/TreeSystem';
 import type { SceneParams } from '../../types/params';
 
 type LightingHandle = ReturnType<typeof buildLighting>;
@@ -66,7 +66,7 @@ export class SceneManager {
 
   applyScene(data: HeightmapData, params: SceneParams): void {
     // Clear everything except the sky (rebuilt with lighting)
-    this.removeNamed('terrain', 'water', 'trees', 'sky');
+    this.removeNamed('terrain', 'water', 'sky', ...TREE_OBJECT_NAMES);
     this.scene.children
       .filter((c) => c instanceof THREE.Light)
       .forEach((l) => this.scene.remove(l));
@@ -83,8 +83,8 @@ export class SceneManager {
     this.lighting = buildLighting(this.scene, params.atmosphere);
 
     // Trees
-    const trees = buildTreeSystem(data.heights, data.normals, params.terrain, params.vegetation, params.water);
-    if (trees) this.scene.add(trees);
+    buildTreeSystem(data.heights, data.normals, params.terrain, params.vegetation, params.water)
+      .forEach((m) => this.scene.add(m));
 
     // Camera FOV
     this.camera.fov = params.camera.fov;
@@ -111,9 +111,9 @@ export class SceneManager {
   }
 
   updateVegetation(data: HeightmapData, params: SceneParams): void {
-    this.removeNamed('trees');
-    const trees = buildTreeSystem(data.heights, data.normals, params.terrain, params.vegetation, params.water);
-    if (trees) this.scene.add(trees);
+    this.removeNamed(...TREE_OBJECT_NAMES);
+    buildTreeSystem(data.heights, data.normals, params.terrain, params.vegetation, params.water)
+      .forEach((m) => this.scene.add(m));
   }
 
   start(): void {
