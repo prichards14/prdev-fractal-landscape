@@ -1,4 +1,4 @@
-# VistaPro Web
+# fractal-landscape
 
 A browser-based 3D landscape generator inspired by the classic Commodore Amiga program **Vista Pro** (1991). Generate fractal terrain with mountains, valleys, rivers, forests, and drifting clouds — all rendered in real time using WebGL.
 
