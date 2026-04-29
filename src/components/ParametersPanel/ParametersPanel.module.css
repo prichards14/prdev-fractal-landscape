@@ -1,0 +1,140 @@
+.panel {
+  width: 260px;
+  min-width: 260px;
+  height: 100%;
+  background: #1a1e24;
+  color: #cdd4de;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #2a3040;
+}
+
+.header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid #2a3040;
+  background: #141820;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #7db8e8;
+  text-transform: uppercase;
+}
+
+.section {
+  padding: 10px 14px 6px;
+  border-bottom: 1px solid #232830;
+}
+
+.section h3 {
+  margin: 0 0 8px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #5a7090;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.label {
+  flex: 0 0 90px;
+  color: #8a9ab0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row input[type='range'] {
+  flex: 1;
+  height: 3px;
+  accent-color: #4a90c8;
+  cursor: pointer;
+}
+
+.value {
+  flex: 0 0 36px;
+  text-align: right;
+  color: #cdd4de;
+  font-variant-numeric: tabular-nums;
+}
+
+.numberInput {
+  flex: 1;
+  background: #232830;
+  border: 1px solid #344050;
+  color: #cdd4de;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.select {
+  flex: 1;
+  background: #232830;
+  border: 1px solid #344050;
+  color: #cdd4de;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.actions {
+  margin-top: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid #2a3040;
+}
+
+.generateBtn {
+  width: 100%;
+  padding: 10px;
+  background: #2e6aad;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.15s;
+}
+
+.generateBtn:hover:not(:disabled) {
+  background: #3a82d4;
+}
+
+.generateBtn:disabled {
+  background: #264466;
+  color: #5a7090;
+  cursor: not-allowed;
+}
+
+.exportBtn {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  color: #7db8e8;
+  border: 1px solid #2e5070;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exportBtn:hover {
+  background: #1e3050;
+}
