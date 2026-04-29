@@ -34,6 +34,7 @@ export function ParametersPanel({ params, generating, onChange, onGenerate, onEx
   const w = params.water;
   const a = params.atmosphere;
   const v = params.vegetation;
+  const cl = params.clouds;
 
   const setTerrain = (patch: Partial<typeof t>) =>
     onChange({ ...params, terrain: { ...t, ...patch } });
@@ -43,6 +44,8 @@ export function ParametersPanel({ params, generating, onChange, onGenerate, onEx
     onChange({ ...params, atmosphere: { ...a, ...patch } });
   const setVeg = (patch: Partial<typeof v>) =>
     onChange({ ...params, vegetation: { ...v, ...patch } });
+  const setClouds = (patch: Partial<typeof cl>) =>
+    onChange({ ...params, clouds: { ...cl, ...patch } });
 
   return (
     <aside className={styles.panel}>
@@ -104,6 +107,22 @@ export function ParametersPanel({ params, generating, onChange, onGenerate, onEx
         <Slider label="Min Elev" value={v.minElevation} min={0.1} max={0.6} onChange={(val) => setVeg({ minElevation: val })} />
         <Slider label="Max Elev" value={v.maxElevation} min={0.3} max={0.95} onChange={(val) => setVeg({ maxElevation: val })} />
         <Slider label="Max Slope" value={v.maxSlope} min={0.1} max={0.9} onChange={(val) => setVeg({ maxSlope: val })} />
+      </section>
+
+      <section className={styles.section}>
+        <h3>Clouds</h3>
+        <label className={styles.row}>
+          <span className={styles.label}>Enabled</span>
+          <input type="checkbox" checked={cl.enabled} onChange={(e) => setClouds({ enabled: e.target.checked })} />
+        </label>
+        <Slider label="Count" value={cl.count} min={0} max={30} step={1} onChange={(val) => setClouds({ count: val })} />
+        <Slider label="Altitude" value={cl.altitude} min={50} max={300} step={5} onChange={(val) => setClouds({ altitude: val })} />
+        <Slider label="Opacity" value={cl.opacity} min={0.2} max={1.0} onChange={(val) => setClouds({ opacity: val })} />
+        <Slider label="Speed" value={cl.speed} min={0} max={20} step={0.5} onChange={(val) => setClouds({ speed: val })} />
+        <label className={styles.row}>
+          <span className={styles.label}>Color</span>
+          <input type="color" value={cl.color} onChange={(e) => setClouds({ color: e.target.value })} />
+        </label>
       </section>
 
       <section className={styles.section}>

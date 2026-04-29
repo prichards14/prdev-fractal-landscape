@@ -4,12 +4,13 @@ import { buildTerrainMesh, type HeightmapData } from '../terrain/TerrainMesh';
 import { buildColorArray } from '../terrain/colorMap';
 import { buildWaterPlane } from '../water/WaterPlane';
 import { buildLighting } from '../atmosphere/Lighting';
+import { buildClouds, animateClouds } from '../atmosphere/CloudSystem';
 import { buildTreeSystem, TREE_OBJECT_NAMES } from '../vegetation/TreeSystem';
 import type { SceneParams } from '../../types/params';
 
 type LightingHandle = ReturnType<typeof buildLighting>;
 
-// Camera far must exceed the sky sphere scale in Lighting.ts
+// Camera far must exceed the sky sphere scale set in Lighting.ts (6000)
 const CAM_FAR = 8000;
 
 export class SceneManager {
@@ -17,19 +18,22 @@ export class SceneManager {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
   private controls: OrbitControls;
+  private clock = new THREE.Clock();
   private animFrameId = 0;
   private lighting: LightingHandle | null = null;
+
+  // Cloud state tracked for safe disposal
+  private cloudMeshes: THREE.Mesh[] = [];
+  private cloudMaterial: THREE.MeshPhongMaterial | null = null;
 
   constructor(canvas: HTMLCanvasElement) {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    // No tone mapping — Lambert materials don't play well with ACES at low exposure
     this.renderer.toneMapping = THREE.NoToneMapping;
 
     this.scene = new THREE.Scene();
-    // Fallback background — visible even if Sky fails to render
     this.scene.background = new THREE.Color(0x7ab0d0);
 
     this.camera = new THREE.PerspectiveCamera(60, canvas.clientWidth / canvas.clientHeight, 0.5, CAM_FAR);
@@ -69,37 +73,58 @@ export class SceneManager {
     });
   }
 
+  private disposeClouds() {
+    this.cloudMeshes.forEach((m) => {
+      this.scene.remove(m);
+      m.geometry.dispose();
+    });
+    this.cloudMaterial?.dispose();
+    this.cloudMeshes = [];
+    this.cloudMaterial = null;
+  }
+
+  private spawnClouds(params: SceneParams) {
+    const { meshes, material } = buildClouds(
+      params.clouds,
+      params.terrain,
+      params.terrain.seed
+    );
+    this.cloudMeshes = meshes;
+    this.cloudMaterial = material;
+    meshes.forEach((m) => this.scene.add(m));
+  }
+
   applyScene(data: HeightmapData, params: SceneParams): void {
     this.removeNamed('terrain', 'water', 'sky', ...TREE_OBJECT_NAMES);
+    this.disposeClouds();
     this.scene.children
       .filter((c) => c instanceof THREE.Light)
       .forEach((l) => this.scene.remove(l));
 
-    // Terrain + water — these must succeed
     const terrain = buildTerrainMesh(data, params.terrain, params.water);
     this.scene.add(terrain);
+
     const water = buildWaterPlane(params.water, params.terrain, params.terrain.heightScale);
     this.scene.add(water);
 
-    // Lighting + sky
     try {
       this.lighting = buildLighting(this.scene, params.atmosphere);
     } catch (e) {
       console.error('[SceneManager] buildLighting failed:', e);
-      // Fall back to simple lighting so terrain is visible
       const sun = new THREE.DirectionalLight(0xfff4e0, 1.5);
       sun.position.set(200, 400, 300);
       this.scene.add(sun);
       this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
     }
 
-    // Trees — isolated so a crash here doesn't kill terrain
     try {
       buildTreeSystem(data.heights, data.normals, params.terrain, params.vegetation, params.water)
         .forEach((m) => this.scene.add(m));
     } catch (e) {
       console.error('[SceneManager] buildTreeSystem failed:', e);
     }
+
+    this.spawnClouds(params);
 
     this.camera.fov = params.camera.fov;
     this.camera.updateProjectionMatrix();
@@ -136,10 +161,17 @@ export class SceneManager {
     }
   }
 
+  updateClouds(params: SceneParams): void {
+    this.disposeClouds();
+    this.spawnClouds(params);
+  }
+
   start(): void {
     const animate = () => {
       this.animFrameId = requestAnimationFrame(animate);
+      const delta = this.clock.getDelta();
       this.controls.update();
+      animateClouds(this.cloudMeshes, delta);
       try {
         this.renderer.render(this.scene, this.camera);
       } catch (e) {
@@ -153,6 +185,7 @@ export class SceneManager {
     cancelAnimationFrame(this.animFrameId);
     window.removeEventListener('resize', this.handleResize);
     this.controls.dispose();
+    this.disposeClouds();
     this.renderer.dispose();
   }
 

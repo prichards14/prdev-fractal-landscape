@@ -50,5 +50,11 @@ export function ViewportCanvas({ heightmapData, params, onSceneReady }: Props) {
     managerRef.current.updateVegetation(heightmapData, paramsRef.current);
   }, [params.vegetation]);
 
+  // Live clouds — rebuild cloud meshes (fast, no heightmap needed)
+  useEffect(() => {
+    if (!managerRef.current) return;
+    managerRef.current.updateClouds(paramsRef.current);
+  }, [params.clouds]);
+
   return <canvas ref={canvasRef} className={styles.canvas} />;
 }
