@@ -13,8 +13,10 @@ interface Props {
 export function ViewportCanvas({ heightmapData, params, onSceneReady }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const managerRef = useRef<SceneManager | null>(null);
+  // Keep a ref to latest params so effects can read without re-running
+  const paramsRef = useRef(params);
+  paramsRef.current = params;
 
-  // Initialize scene manager once
   useEffect(() => {
     if (!canvasRef.current) return;
     const mgr = new SceneManager(canvasRef.current);
@@ -24,17 +26,29 @@ export function ViewportCanvas({ heightmapData, params, onSceneReady }: Props) {
     return () => mgr.stop();
   }, []);
 
-  // Apply new heightmap whenever it arrives
+  // Full rebuild when new heightmap arrives
   useEffect(() => {
     if (!managerRef.current || !heightmapData) return;
-    managerRef.current.applyScene(heightmapData, params);
+    managerRef.current.applyScene(heightmapData, paramsRef.current);
   }, [heightmapData]);
 
-  // Live-update atmosphere without re-generating terrain
+  // Live atmosphere (sun, fog, sky) — instant, no geometry rebuild
   useEffect(() => {
     if (!managerRef.current || !heightmapData) return;
-    managerRef.current.updateAtmosphere(params);
+    managerRef.current.updateAtmosphere(paramsRef.current);
   }, [params.atmosphere]);
+
+  // Live water — rebuild water plane + recolor terrain vertices
+  useEffect(() => {
+    if (!managerRef.current || !heightmapData) return;
+    managerRef.current.updateWater(heightmapData, paramsRef.current);
+  }, [params.water]);
+
+  // Live vegetation — re-place trees without re-generating terrain
+  useEffect(() => {
+    if (!managerRef.current || !heightmapData) return;
+    managerRef.current.updateVegetation(heightmapData, paramsRef.current);
+  }, [params.vegetation]);
 
   return <canvas ref={canvasRef} className={styles.canvas} />;
 }

@@ -33,6 +33,7 @@ export function ParametersPanel({ params, generating, onChange, onGenerate, onEx
   const t = params.terrain;
   const w = params.water;
   const a = params.atmosphere;
+  const v = params.vegetation;
 
   const setTerrain = (patch: Partial<typeof t>) =>
     onChange({ ...params, terrain: { ...t, ...patch } });
@@ -40,6 +41,8 @@ export function ParametersPanel({ params, generating, onChange, onGenerate, onEx
     onChange({ ...params, water: { ...w, ...patch } });
   const setAtmo = (patch: Partial<typeof a>) =>
     onChange({ ...params, atmosphere: { ...a, ...patch } });
+  const setVeg = (patch: Partial<typeof v>) =>
+    onChange({ ...params, vegetation: { ...v, ...patch } });
 
   return (
     <aside className={styles.panel}>
@@ -85,6 +88,22 @@ export function ParametersPanel({ params, generating, onChange, onGenerate, onEx
           <span className={styles.label}>Color</span>
           <input type="color" value={w.color} onChange={(e) => setWater({ color: e.target.value })} />
         </label>
+      </section>
+
+      <section className={styles.section}>
+        <h3>Vegetation</h3>
+        <label className={styles.row}>
+          <span className={styles.label}>Trees</span>
+          <input
+            type="checkbox"
+            checked={v.enabled}
+            onChange={(e) => setVeg({ enabled: e.target.checked })}
+          />
+        </label>
+        <Slider label="Density" value={v.density} min={0.001} max={0.12} step={0.001} onChange={(val) => setVeg({ density: val })} />
+        <Slider label="Min Elev" value={v.minElevation} min={0.1} max={0.6} onChange={(val) => setVeg({ minElevation: val })} />
+        <Slider label="Max Elev" value={v.maxElevation} min={0.3} max={0.95} onChange={(val) => setVeg({ maxElevation: val })} />
+        <Slider label="Max Slope" value={v.maxSlope} min={0.1} max={0.9} onChange={(val) => setVeg({ maxSlope: val })} />
       </section>
 
       <section className={styles.section}>
